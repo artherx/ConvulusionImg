@@ -15,6 +15,14 @@ width, height = imagen.size
 kernel = 3
 filtro = np.ones((kernel, kernel)) / kernel**2
 
+#valores = np.array([[-1,-1,-1],
+#                    [-1, 8,-1],
+#                    [-1,-1,-1]])
+
+#filtro[:3, :3] = valores
+
+#filtro[:3,:3] = [[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]
+
 # Crear una matriz de ceros con borde de tamaño del filtro
 borde = filtro.shape[0] // 2
 matriz = np.zeros((width + 2 * borde, height + 2 * borde))
