@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
-imagen = Image.open('assets\img\Resistencia.jpg')
+imagen = Image.open('assets\img\2022-Tesla-Model-S-8.jpg')
 
 imagenBL = imagen.convert('L')
 imagenBL1 = imagen.convert('L')
+imagenBL2 = imagen.convert('L')
 
 width, high = imagenBL.size
 
@@ -35,8 +36,10 @@ for x in range(lados,width+(lados*2)):
         imagenBL1.putpixel((x-(lados*2),y-(lados*2)),int(suma/(n*n)))
         suma = 0
 
-#for x in range(width):
- #   for y in range(high):
-  #      imagenBL1.putpixel((x,y),(imagenBL.getpixel((x,y))-imagenBL1.getpixel((x,y))))
+for x in range(width):
+   for y in range(high):
+      imagenBL1.putpixel((x,y),(imagenBL.getpixel((x,y))-imagenBL1.getpixel((x,y))))
+      
 imagenBL.show()
 imagenBL1.show()
+imagenBL2.show()
