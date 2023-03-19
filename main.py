@@ -45,12 +45,11 @@ for x in range(width):
         imagen_filt.putpixel((x, y), valor)
 
 # Mostrar las imágenes original y filtrada
-plt.subplot(121)
-plt.imshow(imagen, cmap='gray')
-plt.title('Original')
-plt.axis('off')
-plt.subplot(122)
-plt.imshow(imagen_filt, cmap='gray')
-plt.title('Filtrada')
-plt.axis('off')
-plt.show()
+imagen_fil = Image.new('L', (width, height))
+for x in range(width):
+   for y in range(height):
+      imagen_fil.putpixel((x,y),(imagen.getpixel((x,y))-imagen_filt.getpixel((x,y))))
+
+imagen.show()
+imagen_filt.show()
+imagen_fil.show()
