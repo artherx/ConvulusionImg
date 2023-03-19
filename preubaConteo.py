@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-
+from skimage import filters
 
 # Cargar la imagen
 imagen = Image.open('assets\img\Resistencia.jpg')
@@ -16,11 +16,11 @@ width, height = imagen.size
 kernel = 9
 filtro = np.ones((kernel, kernel)) / kernel**2
 
-#valores = np.array([[-1,-1,-1],
-#                    [-1, 8,-1],
-#                    [-1,-1,-1]])
+valores = np.array([[-1,-1,-1],
+                    [-1, 8,-1],
+                    [-1,-1,-1]])
 
-#filtro[:3, :3] = valores
+filtro[:3, :3] = valores
 
 #filtro[:3,:3] = [[-1,-1,-1],
 #                 [-1,8,-1],
@@ -53,6 +53,23 @@ for x in range(width):
    for y in range(height):
       imagen_fil.putpixel((x,y),(imagen.getpixel((x,y))-imagen_filt.getpixel((x,y))))
 
+# Calcular el umbral
+imagen_fil_array = np.array(imagen_filt)
+umbral = filters.threshold_otsu(imagen_fil_array)
+
+# Contar el número de objetos
+num_objetos = 0
+for i in range(imagen_fil_array.shape[0]):
+    for j in range(imagen_fil_array.shape[1]):
+        if imagen_fil_array[i,j] < umbral:
+            num_objetos += 1
+
+print("Número de objetos encontrados:", num_objetos)
+
 imagen.show()
 imagen_filt.show()
 imagen_fil.show()
+
+
+
+
