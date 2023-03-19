@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
-imagen = Image.open('assets\img\2022-Tesla-Model-S-8.jpg')
+imagen = Image.open('assets\img\papu2.jpg')
 
 imagenBL = imagen.convert('L')
 imagenBL1 = imagen.convert('L')
@@ -38,8 +38,8 @@ for x in range(lados,width+(lados*2)):
 
 for x in range(width):
    for y in range(high):
-      imagenBL1.putpixel((x,y),(imagenBL.getpixel((x,y))-imagenBL1.getpixel((x,y))))
-      
+      imagenBL2.putpixel((x,y),(imagenBL.getpixel((x,y))-imagenBL1.getpixel((x,y))))
+
 imagenBL.show()
 imagenBL1.show()
 imagenBL2.show()
