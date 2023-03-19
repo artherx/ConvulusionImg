@@ -2,44 +2,47 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-
+# Cargar la imagen
 imagen = Image.open('assets\img\papu2.jpg')
 
-imagenBL = imagen.convert('L')
-imagenBL1 = imagen.convert('L')
-imagenBL2 = imagen.convert('L')
+# Convertir a escala de grises
+imagen = imagen.convert('L')
 
-width, high = imagenBL.size
+# Tamaño de la imagen
+width, height = imagen.size
 
+# Filtro promedio 3x3
+kernel = 3
+filtro = np.ones((kernel, kernel)) / kernel**2
 
+# Crear una matriz de ceros con borde de tamaño del filtro
+borde = filtro.shape[0] // 2
+matriz = np.zeros((width + 2 * borde, height + 2 * borde))
 
-
-n=3
-lados = int((n-1)/2)
-suma=0
-matriz = np.zeros((width+(lados*2), high+(lados*2)))
-
+# Rellenar la matriz con los valores de la imagen
 for x in range(width):
-    for y in range(high):
-        matriz[x+lados,y+lados] = imagenBL.getpixel((x,y))
+    for y in range(height):
+        matriz[x + borde, y + borde] = imagen.getpixel((x, y))
 
-
-for x in range(lados,width+(lados*2)):
-    for y in range(lados,high+(lados*2)):
-        for pasX in range(n):
-            for pasY in range(n):
-                suma+=matriz[x,y]
-        if suma >256:
-            suma=255
-        elif suma < -1:
-            suma = 0
-        imagenBL1.putpixel((x-(lados*2),y-(lados*2)),int(suma/(n*n)))
+# Aplicar el filtro a cada píxel de la imagen
+imagen_filt = Image.new('L', (width, height))
+for x in range(width):
+    for y in range(height):
         suma = 0
+        for i in range(filtro.shape[0]):
+            for j in range(filtro.shape[1]):
+                suma += matriz[x + i, y + j] * filtro[i, j]
+        # Asegurarse de que el valor esté en el rango [0, 255]
+        valor = int(max(0, min(suma, 255)))
+        imagen_filt.putpixel((x, y), valor)
 
-for x in range(width):
-   for y in range(high):
-      imagenBL2.putpixel((x,y),(imagenBL.getpixel((x,y))-imagenBL1.getpixel((x,y))))
-
-imagenBL.show()
-imagenBL1.show()
-imagenBL2.show()
+# Mostrar las imágenes original y filtrada
+plt.subplot(121)
+plt.imshow(imagen, cmap='gray')
+plt.title('Original')
+plt.axis('off')
+plt.subplot(122)
+plt.imshow(imagen_filt, cmap='gray')
+plt.title('Filtrada')
+plt.axis('off')
+plt.show()
