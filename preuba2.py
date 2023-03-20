@@ -4,7 +4,7 @@ from PIL import Image
 from scipy.signal import convolve2d
 
 # Cargar la imagen
-imagen = Image.open('assets\img\Resistencia.jpg')
+imagen = Image.open('assets\img\ImgRes\IMG_20230319_201515.jpg')
 
 # Convertir a escala de grises
 imagen = imagen.convert('L')
@@ -25,12 +25,10 @@ imagen_filt = Image.fromarray(imagen_filt_arr.astype(np.uint8))
 imagen_fil_arr = imagen_arr - imagen_filt_arr
 imagen_fil = Image.fromarray(imagen_fil_arr.astype(np.uint8))
 
-umbral = 100
-imagen_fil_arr[imagen_fil_arr > umbral] = 255
-imagen_fil_arr[imagen_fil_arr <= umbral] = 0
-imagen_fil = Image.fromarray(imagen_fil_arr.astype(np.uint8))
+
 
 # Mostrar las imágenes original, filtrada y la diferencia
+imagen_filt.show()
 fig, axs = plt.subplots(1, 3)
 axs[0].imshow(imagen, cmap='gray')
 axs[0].set_title('Original')
