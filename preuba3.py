@@ -5,13 +5,15 @@ import os
 imagen = Image.open('assets\img\Resistencia.jpg')
 
 # Convertir a escala de grises
-imagen = imagen.convert('L')
+width, height = imagen.size
+imagen = imagen.convert('L').resize(width//2,height//2)
 
 #filtro_promedio=lb.convo(imagen,lb.filt_prome(3),lb.img_central(imagen,lb.filt_prome(3)))
 #filtro_solber = lb.filtro_solber(imagen)
 #prewitt = lb.prewitt(imagen)
 a=1
 while a==1:
+    imagen.show()
     nombre = input("ingresa:\n1 para filtro promedio\n2 para filtro gaussian\n3 para filtro readre\n4 para filtro shapen\n5 para filtro roberts\n6 para filtro prewitt\n7 para filtro sobel\nsi queires salir, escribe salir\n")
     print("se ingrso: ", nombre)
     if nombre=="1":
