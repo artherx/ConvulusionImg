@@ -107,3 +107,32 @@ def prewitt(img):
 def filtro_solber(img):
     imagen_know = img_sum(convo(img,filtro_solberx,img_central(img,filtro_solberx)),convo(img,filtro_solbery,img_central(img,filtro_solbery)))
     return imagen_know
+
+def conteo_obj(img: Image) -> Image:
+    anch, alto = img.size
+    imgM = Image.new('L', (anch, alto))
+    a = 0
+    x = 0
+    y = 0
+    tono = img.getpixel((x,y))
+
+    while anch*alto != a:
+        if img.getpixel((x,y)) == tono:
+            imgM.putpixel((x,y), 255)
+            if (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
+               (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
+               (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
+               (x > 0 and imgM.getpixel((x-1, y)) == 0):
+                if y > 0 and imgM.getpixel((x, y-1)) == 0:
+                    y-=1
+                elif x < anch-1 and imgM.getpixel((x+1, y)) == 0:
+                    x+=1
+                elif y < alto-1 and imgM.getpixel((x, y+1)) == 0:
+                    y+=1
+                elif x > 0 and imgM.getpixel((x-1, y)) == 0:
+                    x-=1
+            else:
+                y+=1
+        a+=1
+    
+    return imgM
