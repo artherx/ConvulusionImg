@@ -2,11 +2,14 @@ import lib as lb
 from PIL import Image
 import os
 
-imagen = Image.open('assets\img\WhatsApp Image 2023-03-20 at 9.05.16 PM.jpeg')
+
+imagen = Image.open('assets\img\leer imagen.png')
 
 # Convertir a escala de grises
 width, height = imagen.size
-imagen = imagen.convert('L').resize((width//2,height//2))
+imagen = imagen.convert('L')
+if width>= 1000 or height >= 1000:
+    imagen = imagen.resize((width//2,height//2))
 
 a=1
 imagen.show()
@@ -67,12 +70,14 @@ while a==1:
     if nombre == "7":
         filtro_ruberts = lb.prewitt(imagen).show()
         print("se añadio el filtro")
+    if nombre == "8":
+        lb.conteo_obj(imagen).show()
     if nombre == "salir":
         os.system("cls")
         break
     else:
         print("lo sentimos, no ingreaste un valor exixtente")
-    os.system("cls")
+    #os.system("cls")
 
 
 
