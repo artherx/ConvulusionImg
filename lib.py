@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+import random
 
 
 # Filtro promedio 3x3
@@ -108,31 +109,123 @@ def filtro_solber(img):
     imagen_know = img_sum(convo(img,filtro_solberx,img_central(img,filtro_solberx)),convo(img,filtro_solbery,img_central(img,filtro_solbery)))
     return imagen_know
 
-def conteo_obj(img: Image) -> Image:
+def conteo_obj_4N(img: Image) -> Image:
     anch, alto = img.size
     imgM = Image.new('L', (anch, alto))
     a = 0
-    x = 0
-    y = 0
+    x:int = 0
+    y:int = 0
     tono = img.getpixel((x,y))
+    nTono = 255
 
-    while anch*alto != a:
-        if img.getpixel((x,y)) == tono:
-            imgM.putpixel((x,y), 255)
+    while anch*alto != a :
+        if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
+            imgM.putpixel((x,y), nTono)
+            print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
             if (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
                (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
                (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
                (x > 0 and imgM.getpixel((x-1, y)) == 0):
-                if y > 0 and imgM.getpixel((x, y-1)) == 0:
+                if y > 0 and imgM.getpixel((x, y-1)) == 0 and img.getpixel((x, y-1))==tono:
                     y-=1
-                elif x < anch-1 and imgM.getpixel((x+1, y)) == 0:
+                elif x < anch-1 and imgM.getpixel((x+1, y)) == 0 and img.getpixel((x+1, y))==tono:
                     x+=1
-                elif y < alto-1 and imgM.getpixel((x, y+1)) == 0:
+                elif y < alto-1 and imgM.getpixel((x, y+1)) == 0 and img.getpixel((x, y+1))==tono:
                     y+=1
-                elif x > 0 and imgM.getpixel((x-1, y)) == 0:
+                elif x > 0 and imgM.getpixel((x-1, y)) == 0 and img.getpixel((x-1, y))==tono:
                     x-=1
+                print(" fX:", x, " fY:", y)
             else:
-                y+=1
+                print("fin")
+                
+                
+        else:
+            print("no se mueve")
+            b = 0
+            while b == 0:
+                print("evaluando")
+                x = random.randint(0,anch-1)
+                y = random.randint(0,alto-1)
+                if imgM.getpixel((x, y)) == 0:
+                    tono = img.getpixel((x,y))
+                    nTono = nTono//2
+                    print("termino compro")
+                    break
+                print("repito")
+
+            
+
         a+=1
     
     return imgM
+
+def conteo_obj_4D(img: Image) -> Image:
+    anch, alto = img.size
+    imgM = Image.new('L', (anch, alto))
+    a = 0
+    x:int = 0
+    y:int = 0
+    tono = img.getpixel((x,y))
+    nTono = 255
+
+    while anch*alto != a :
+        if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
+            imgM.putpixel((x,y), nTono)
+            print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
+            if (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
+               (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
+               (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
+               (x > 0 and imgM.getpixel((x-1, y)) == 0):
+                if x> 0 and y > 0 and imgM.getpixel((-x, y-1)) == 0 and img.getpixel((x, y-1))==tono:
+                    y-=1
+                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y))==tono:
+                    x+=1
+                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x, y+1))==tono:
+                    y+=1
+                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y))==tono:
+                    x-=1
+                print(" fX:", x, " fY:", y)
+            else:
+                print("fin")
+                
+                
+        else:
+            print("no se mueve")
+            b = 0
+            while b == 0:
+                print("evaluando")
+                x = random.randint(0,anch-1)
+                y = random.randint(0,alto-1)
+                if imgM.getpixel((x, y)) == 0:
+                    tono = img.getpixel((x,y))
+                    nTono = nTono//2
+                    print("termino compro")
+                    break
+                print("repito")
+
+            
+
+        a+=1
+    
+    return imgM
+
+def filtro_mediana(img: Image) -> Image:
+    matriz= img_central(img)
+    filtro = [1]*9
+    width, height = img.size
+    imagen_filt = Image.new('L', (width, height))
+    te = 0
+    for x in range(width):
+        for y in range(height):
+            suma = 0
+            for i in range(filtro.shape[0]):
+                for j in range(filtro.shape[1]):
+                    if j+1 < width-1 and matriz[x, j] > matriz[x, j+1]:
+                        te = matriz[i,j]
+                        matriz[i,j] = matriz[i,j+1]
+                        matriz[i, j+1] = te
+                        
+            te = matriz[1,1]
+            # Asegurarse de que el valor esté en el rango [0, 255]
+            imagen_filt.putpixel((x, y), te)
+    return imagen_filt

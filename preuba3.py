@@ -71,7 +71,9 @@ while a==1:
         filtro_ruberts = lb.prewitt(imagen).show()
         print("se añadio el filtro")
     if nombre == "8":
-        lb.conteo_obj(imagen).show()
+        lb.conteo_obj_4N(imagen).show()
+    if nombre == "9":
+        lb.conteo_obj_4D(imagen).show()
     if nombre == "salir":
         os.system("cls")
         break
