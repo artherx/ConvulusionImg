@@ -121,7 +121,7 @@ def conteo_obj_4N(img: Image) -> Image:
     while anch*alto != a :
         if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
             imgM.putpixel((x,y), nTono)
-            print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
+            #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
             if (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
                (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
                (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
@@ -134,24 +134,22 @@ def conteo_obj_4N(img: Image) -> Image:
                     y+=1
                 elif x > 0 and imgM.getpixel((x-1, y)) == 0 and img.getpixel((x-1, y))==tono:
                     x-=1
-                print(" fX:", x, " fY:", y)
-            else:
-                print("fin")
+                #print(" fX:", x, " fY:", y)
                 
                 
         else:
-            print("no se mueve")
+            #print("no se mueve")
             b = 0
             while b == 0:
-                print("evaluando")
+                #print("evaluando")
                 x = random.randint(0,anch-1)
                 y = random.randint(0,alto-1)
                 if imgM.getpixel((x, y)) == 0:
                     tono = img.getpixel((x,y))
                     nTono = nTono//2
-                    print("termino compro")
+                    #print("termino compro")
                     break
-                print("repito")
+                #print("repito")
 
             
 
@@ -171,12 +169,12 @@ def conteo_obj_4D(img: Image) -> Image:
     while anch*alto != a :
         if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
             imgM.putpixel((x,y), nTono)
-            print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
-            if (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
-               (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
-               (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
-               (x > 0 and imgM.getpixel((x-1, y)) == 0):
-                if x> 0 and y > 0 and imgM.getpixel((-x, y-1)) == 0 and img.getpixel((x, y-1))==tono:
+            #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
+            if (x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0) or \
+               (x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0) or \
+               (y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0) or \
+               (x > 0 and y < alto-1 and imgM.getpixel((x-1, y+1)) == 0):
+                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((x, y-1))==tono:
                     y-=1
                 elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y))==tono:
                     x+=1
@@ -184,24 +182,22 @@ def conteo_obj_4D(img: Image) -> Image:
                     y+=1
                 elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y))==tono:
                     x-=1
-                print(" fX:", x, " fY:", y)
-            else:
-                print("fin")
+                #print(" fX:", x, " fY:", y)
                 
                 
         else:
-            print("no se mueve")
+            #print("no se mueve")
             b = 0
             while b == 0:
-                print("evaluando")
+                #print("evaluando")
                 x = random.randint(0,anch-1)
                 y = random.randint(0,alto-1)
                 if imgM.getpixel((x, y)) == 0:
                     tono = img.getpixel((x,y))
                     nTono = nTono//2
-                    print("termino compro")
+                    #print("termino compro")
                     break
-                print("repito")
+                #print("repito")
 
             
 
@@ -215,17 +211,90 @@ def filtro_mediana(img: Image) -> Image:
     width, height = img.size
     imagen_filt = Image.new('L', (width, height))
     te = 0
+    c = 1
     for x in range(width):
         for y in range(height):
-            suma = 0
+            for h in (filtro.shape[0]*filtro.shape[1]):
+                for i in range(filtro.shape[0]):
+                    for j in range(filtro.shape[1]):
+                        if j+1 < width-1 and matriz[x, j] > matriz[x, j+1]:
+                            te = matriz[i,j]
+                            matriz[i,j] = matriz[i,j+1]
+                            matriz[i, j+1] = te
+                        
+            te = matriz[1,1]
+            # Asegurarse de que el valor esté en el rango [0, 255]
+            imagen_filt.putpixel((x, y), te)
+    return imagen_filt
+
+def filtro_menimo(img: Image) -> Image:
+    matriz= img_central(img)
+    filtro = [1]*9
+    width, height = img.size
+    imagen_filt = Image.new('L', (width, height))
+    te = 0
+    c = 1
+    for x in range(width):
+        for y in range(height):
             for i in range(filtro.shape[0]):
                 for j in range(filtro.shape[1]):
                     if j+1 < width-1 and matriz[x, j] > matriz[x, j+1]:
-                        te = matriz[i,j]
-                        matriz[i,j] = matriz[i,j+1]
-                        matriz[i, j+1] = te
+                        te = matriz[x, j+1]
                         
-            te = matriz[1,1]
+            # Asegurarse de que el valor esté en el rango [0, 255]
+            imagen_filt.putpixel((x, y), te)
+    return imagen_filt
+
+def filtro_bancos(img: Image) -> Image:
+    filtro = [1]*9
+    width, height = img.size
+    imagen_filt = Image.new('L', (width, height))
+    te = 0
+    c = 1
+    for x in range(width):
+        for y in range(height):
+            if img.getpixel((x,y))==255:
+                if y > 0 and img.getpixel((x, y-1)) != 255 :
+                    te1 = 0
+                    te1 = img.getpixel((x,y-1))
+                if x < width-1 and img.getpixel((x+1, y)) != 255:
+                    te2 = 0
+                    te2 = img.getpixel((x+1,y))
+                if y < height-1 and img.getpixel((x, y+1)) != 255:
+                    te3 = 0
+                    te3 = img.getpixel((x,y+1))
+                if x > 0 and img.getpixel((x-1, y)) != 255:
+                    te4 = 0
+                    te4 = img.getpixel((x-1,y))
+                te = (te1+te2+te3+te4)//4
+
+            # Asegurarse de que el valor esté en el rango [0, 255]
+            imagen_filt.putpixel((x, y), te)
+    return imagen_filt
+
+def filtro_negros(img: Image) -> Image:
+    filtro = [1]*9
+    width, height = img.size
+    imagen_filt = Image.new('L', (width, height))
+    te = 0
+    c = 1
+    for x in range(width):
+        for y in range(height):
+            if img.getpixel((x,y))==0:
+                if y > 0 and img.getpixel((x, y-1)) != 0 :
+                    te1 = 0
+                    te1 = img.getpixel((x,y-1))
+                if x < width-1 and img.getpixel((x+1, y)) != 0:
+                    te2 = 0
+                    te2 = img.getpixel((x+1,y))
+                if y < height-1 and img.getpixel((x, y+1)) != 0:
+                    te3 = 0
+                    te3 = img.getpixel((x,y+1))
+                if x > 0 and img.getpixel((x-1, y)) != 0:
+                    te4 = 0
+                    te4 = img.getpixel((x-1,y))
+                te = (te1+te2+te3+te4)//4
+
             # Asegurarse de que el valor esté en el rango [0, 255]
             imagen_filt.putpixel((x, y), te)
     return imagen_filt
