@@ -73,7 +73,7 @@ while a==1:
     if nombre == "8":
         lb.conteo_obj_4N(imagen).show()
     if nombre == "9":
-        lb.conteo_obj_4D(imagen).show()
+        lb.filtro_mediana(imagen).show()
     if nombre == "salir":
         os.system("cls")
         break
