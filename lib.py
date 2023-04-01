@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing
 from PIL import Image
 import random
 
@@ -158,6 +159,30 @@ def conteo_obj_4N(img: Image) -> Image:
 
         a+=1
     
+    return imgM
+
+def procesar_bloque(bloque: Image) -> Image:
+    return conteo_obj_4N(bloque)
+
+def conteo_obj_4N_paralelo(img: Image, num_procesos: int) -> Image:
+    anch, alto = img.size
+    bloques: List[Image] = []
+
+    # Dividir la imagen en bloques
+    ancho_bloque = anch // num_procesos
+    for i in range(num_procesos):
+        bloque = img.crop((i*ancho_bloque, 0, (i+1)*ancho_bloque, alto))
+        bloques.append(bloque)
+
+    # Procesar cada bloque en paralelo
+    with multiprocessing.Pool(processes=num_procesos) as pool:
+        resultados = pool.map(procesar_bloque, bloques)
+
+    # Combinar los resultados de cada bloque
+    imgM = Image.new('L', (anch, alto))
+    for i, resultado in enumerate(resultados):
+        imgM.paste(resultado, (i*ancho_bloque, 0))
+
     return imgM
 
 def conteo_obj_8N(img: Image) -> Image:
