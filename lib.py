@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import random
 
+objetos:int = 1
 
 # Filtro promedio 3x3
 def filt_prome(tam):
@@ -141,11 +142,17 @@ def conteo_obj_4N(img: Image) -> Image:
             #print("no se mueve")
             for i in range(anch):
                 for j in range(alto):
-                    if imgM.getpixel((i,j))==0:
+                    if imgM.getpixel((i,j)) == 0:
+                        x = i
+                        y = j
                         tono = img.getpixel((i,j))
-                        nTono = nTono//2
-                    if i == anch-1 and j == alto-1 and imgM.getpixel((i,j))!=0:
-                        a = anch*alto
+                        if nTono<=50:
+                            nTono = random.randint(20,255)
+                        nTono = nTono // 2
+                        break 
+                else:
+                    continue  
+                break  
 
             
 
@@ -174,22 +181,22 @@ def conteo_obj_8N(img: Image) -> Image:
                (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
                (x > 0 and y < alto-1 and imgM.getpixel((x-1, y+1)) == 0) or \
                 (x > 0 and imgM.getpixel((x-1, y)) == 0):
-                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((x, y-1))==tono:
+                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((x-1, y-1))==tono:
                     y-=1
                     x-=1
                 elif y > 0 and imgM.getpixel((x, y-1)) == 0 and img.getpixel((x, y-1))==tono:
                     y-=1
-                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y))==tono:
+                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y-1))==tono:
                     x+=1
                     y-=1
                 elif x < anch-1 and imgM.getpixel((x+1, y)) == 0 and img.getpixel((x+1, y))==tono:
                     x+=1
-                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x, y+1))==tono:
+                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x+1, y+1))==tono:
                     y+=1
                     x+=1
                 elif y < alto-1 and imgM.getpixel((x, y+1)) == 0 and img.getpixel((x, y+1))==tono:
                     y+=1
-                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y))==tono:
+                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y + 1))==tono:
                     x-=1
                     y+=1
                 elif x > 0 and imgM.getpixel((x-1, y)) == 0 and img.getpixel((x-1, y))==tono:
@@ -201,11 +208,17 @@ def conteo_obj_8N(img: Image) -> Image:
             #print("no se mueve")
             for i in range(anch):
                 for j in range(alto):
-                    if imgM.getpixel((i,j))==0:
+                    if imgM.getpixel((i,j)) == 0:
+                        x = i
+                        y = j
                         tono = img.getpixel((i,j))
-                        nTono = nTono//2
-                    if i == anch-1 and j == alto-1 and imgM.getpixel((i,j))!=0:
-                        a = anch*alto
+                        if nTono<=50:
+                            nTono = random.randint(20,255)
+                        nTono = nTono // 2
+                        break 
+                else:
+                    continue  
+                break  
             
 
         a+=1
@@ -229,16 +242,16 @@ def conteo_obj_4D(img: Image) -> Image:
                (x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0) or \
                (y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0) or \
                (x > 0 and y < alto-1 and imgM.getpixel((x-1, y+1)) == 0):
-                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((x, y-1))==tono:
+                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((-x, y-1))==tono:
                     y-=1
                     x-=1
-                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y))==tono:
+                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y-1))==tono:
                     x+=1
                     y-=1
-                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x, y+1))==tono:
+                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x+1, y+1))==tono:
                     y+=1
                     x+=1
-                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y))==tono:
+                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y + 1))==tono:
                     x-=1
                     y+=1
                 #print(" fX:", x, " fY:", y)
@@ -248,11 +261,17 @@ def conteo_obj_4D(img: Image) -> Image:
             #print("no se mueve")
             for i in range(anch):
                 for j in range(alto):
-                    if imgM.getpixel((i,j))==0:
+                    if imgM.getpixel((i,j)) == 0:
+                        x = i
+                        y = j
                         tono = img.getpixel((i,j))
-                        nTono = nTono//2
-                    if i == anch-1 and j == alto-1 and imgM.getpixel((i,j))!=0:
-                        a = anch*alto
+                        if nTono<=50:
+                            nTono = random.randint(20,255)
+                        nTono = nTono // 2
+                        break 
+                else:
+                    continue  
+                break  
            
 
             

@@ -3,13 +3,13 @@ from PIL import Image
 import os
 
 
-imagen = Image.open('assets\img\leer imagen.png')
+imagen = Image.open('assets\img\chess.jpg')
 
 # Convertir a escala de grises
 width, height = imagen.size
 imagen = imagen.convert('L')
 if width>= 1000 or height >= 1000:
-    imagen = imagen.resize((width//2,height//2))
+    imagen = imagen.resize((width//8,height//8))
 
 a=1
 imagen.show()
