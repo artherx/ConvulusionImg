@@ -1,5 +1,7 @@
 import lib as lb
 from PIL import Image
+import numpy as np
+import time
 import os
 
 
@@ -8,10 +10,13 @@ imagen = Image.open('assets\img\chess.jpg')
 # Convertir a escala de grises
 width, height = imagen.size
 imagen = imagen.convert('L')
-if width>= 1000 or height >= 1000:
-    imagen = imagen.resize((width//8,height//8))
 
+imagen_array = np.array(imagen)
+anch, alto = imagen.size
 a=1
+
+imgMN = lb.umbra(imagen_array)
+
 imagen.show()
 while a==1:
     nombre = input("ingresa:\n1 para filtro promedio\n2 para filtro gaussian\n3 para filtro readre\n4 para filtro shapen\n5 para filtro roberts\n6 para filtro prewitt\n7 para filtro sobel\nsi queires salir, escribe salir\n")
@@ -71,9 +76,24 @@ while a==1:
         filtro_ruberts = lb.prewitt(imagen).show()
         print("se añadio el filtro")
     if nombre == "8":
-        lb.conteo_obj_4N(imagen).show()
+        t1 = time.perf_counter_ns()
+        imgM = lb.conteo_obj_4N(imgMN)
+    
+        # Rellenar la imagen con los valores de la matriz
+        imagen_pil = Image.fromarray(imgM)
+        imagen_pil.show()
+        t2 = time.perf_counter_ns()
+        print((t2-t1)/10**9)
     if nombre == "9":
         lb.filtro_mediana(imagen).show()
+    if nombre == '10':
+        t1 = time.perf_counter_ns()
+        imgMN = lb.umbra(imagen_array)
+
+        imgPil = Image.fromarray(imgMN)
+        imgPil.show()
+        t2 = time.perf_counter_ns()
+        print((t2-t1)/10**9)
     if nombre == "salir":
         os.system("cls")
         break
