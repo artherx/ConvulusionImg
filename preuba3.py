@@ -4,7 +4,7 @@ import numpy as np
 import time
 import os
 
-
+#pruba2
 imagen = Image.open('assets\img\chess.jpg')
 
 # Convertir a escala de grises
