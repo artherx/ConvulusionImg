@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import os
 
 #definicion para obtener el umbral
 def umbra(img):
@@ -43,7 +44,7 @@ while a==1:
         #agrega los nuevos datos de la iamgen a nueva_imagen
         image_otsu = Image.fromarray(umbral)
         #renombra y guarda la imagen ya 'otsurizada'
-        image_otsu.save('chess-otsu.jpg')
+        image_otsu.save('ConvulusionImg\segmentacion\chess-otsu.jpg')
         image_otsu.show()
         foto.close()
         #imagen_otsu=otsu(foto,umbral)
@@ -53,7 +54,13 @@ while a==1:
         #METODO DETECCION BORDES
         #===============================================================================================================
         
-    #if nombre=="3":
+    if nombre=="3":
         #===============================================================================================================
         #METODO CRECIMIENTO DE REGIONES
         #===============================================================================================================
+        
+    if nombre == "salir":
+        os.system("cls")
+        break
+    else:
+        print("lo sentimos, no ingreaste un valor exixtente")
