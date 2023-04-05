@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing
 from PIL import Image
+from numba import njit
 import random
+
 
 objetos:int = 1
 
@@ -11,9 +13,8 @@ def filt_prome(tam):
     kernel = tam
     filtro = np.ones((kernel, kernel)) / kernel**2
     return filtro
-
+@njit
 def filt_gaussian(tam, sigma:float):
-    kernel = tam
     m_half = tam // 2
     n_half = tam // 2
     gaussian_filter = np.zeros((tam, tam), np.float32)
@@ -26,7 +27,7 @@ def filt_gaussian(tam, sigma:float):
             gaussian_filter[y+m_half, x+n_half] = normal * exp_term
     return gaussian_filter
 
-def img_central(imagen, filtro):
+def img_central(imagen: Image, filtro):
     width, height = imagen.size
     borde = filtro.shape[0] // 2
     matriz = np.zeros((width + 2 * borde, height + 2 * borde))
@@ -44,8 +45,8 @@ filtro_redre = np.array([[-1,-1,-1],
 
 
 filtro_shapen =np.array([[-1,-1,-1],
-                 [-1,9,-1],
-                 [-1,-1,-1]])
+                        [-1,9,-1],
+                        [-1,-1,-1]])
 
 filtro_gaussian3x3 =np.array([[-1,-1,-1],
                  [-1,9,-1],
@@ -78,6 +79,7 @@ def convo(imagen,filtro,matriz):
             suma = 0
             for i in range(filtro.shape[0]):
                 for j in range(filtro.shape[1]):
+                    suma = suma + (matriz[x + i, y + j] * filtro[i, j])
                     suma += (matriz[x + i, y + j] * filtro[i, j])
             # Asegurarse de que el valor esté en el rango [0, 255]
             valor = int(max(0, min(suma, 255)))
@@ -111,30 +113,32 @@ def filtro_solber(img):
     imagen_know = img_sum(convo(img,filtro_solberx,img_central(img,filtro_solberx)),convo(img,filtro_solbery,img_central(img,filtro_solbery)))
     return imagen_know
 
-def conteo_obj_4N(img: Image) -> Image:
-    anch, alto = img.size
-    imgM = Image.new('L', (anch, alto))
+@njit
+def conteo_obj_4N(img: np.ndarray[(1024,1024), int]) -> int:
+    anch, alto = img.shape
+    imgN = img
+    imgM = np.zeros((anch,alto))
     a = 0
-    x:int = 0
-    y:int = 0
-    tono = img.getpixel((x,y))
+    x = 0
+    y = 0
+    tono = imgN[x,y]
     nTono = 255
 
     while anch*alto != a :
-        if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
-            imgM.putpixel((x,y), nTono)
+        if imgN[x,y] == tono and imgM[x,y] == 0:
+            imgM[x,y] = nTono
             #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
-            if (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
-               (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
-               (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
-               (x > 0 and imgM.getpixel((x-1, y)) == 0):
-                if y > 0 and imgM.getpixel((x, y-1)) == 0 and img.getpixel((x, y-1))==tono:
+            if (y > 0 and imgM[x,y-1] == 0) or \
+               (x < anch-1 and imgM[x+1,y] == 0) or \
+               (y < alto-1 and imgM[x,y+1] == 0) or \
+               (x > 0 and imgM[x-1,y] == 0):
+                if y > 0 and imgM[x, y-1] == 0 and imgN[x,y-1]==tono:
                     y-=1
-                elif x < anch-1 and imgM.getpixel((x+1, y)) == 0 and img.getpixel((x+1, y))==tono:
+                elif x < anch-1 and imgM[x+1,y] == 0 and imgN[x+1,y]==tono:
                     x+=1
-                elif y < alto-1 and imgM.getpixel((x, y+1)) == 0 and img.getpixel((x, y+1))==tono:
+                elif y < alto-1 and imgM[x,y+1] == 0 and imgN[x,y+1]==tono:
                     y+=1
-                elif x > 0 and imgM.getpixel((x-1, y)) == 0 and img.getpixel((x-1, y))==tono:
+                elif x > 0 and imgM[x-1,y] == 0 and imgN[x-1,y]==tono:
                     x-=1
                 #print(" fX:", x, " fY:", y)
                 
@@ -143,10 +147,10 @@ def conteo_obj_4N(img: Image) -> Image:
             #print("no se mueve")
             for i in range(anch):
                 for j in range(alto):
-                    if imgM.getpixel((i,j)) == 0:
+                    if imgM[i,j] == 0:
                         x = i
                         y = j
-                        tono = img.getpixel((i,j))
+                        tono = imgN[i,j]
                         if nTono<=50:
                             nTono = random.randint(20,255)
                         nTono = nTono // 2
@@ -155,88 +159,63 @@ def conteo_obj_4N(img: Image) -> Image:
                     continue  
                 break  
 
-            
+        
 
         a+=1
     
     return imgM
 
-def procesar_bloque(bloque: Image) -> Image:
-    return conteo_obj_4N(bloque)
-
-def conteo_obj_4N_paralelo(img: Image, num_procesos: int) -> Image:
-    anch, alto = img.size
-    bloques: List[Image] = []
-
-    # Dividir la imagen en bloques
-    ancho_bloque = anch // num_procesos
-    for i in range(num_procesos):
-        bloque = img.crop((i*ancho_bloque, 0, (i+1)*ancho_bloque, alto))
-        bloques.append(bloque)
-
-    # Procesar cada bloque en paralelo
-    with multiprocessing.Pool(processes=num_procesos) as pool:
-        resultados = pool.map(procesar_bloque, bloques)
-
-    # Combinar los resultados de cada bloque
-    imgM = Image.new('L', (anch, alto))
-    for i, resultado in enumerate(resultados):
-        imgM.paste(resultado, (i*ancho_bloque, 0))
-
-    return imgM
-
-def conteo_obj_8N(img: Image) -> Image:
-    anch, alto = img.size
-    imgM = Image.new('L', (anch, alto))
+@njit
+def conteo_obj_8N(img: np.ndarray[(1024,1024), int]) -> int:
+    anch, alto = img.shape
+    imgN = img
+    imgM = np.zeros((anch,alto))
     a = 0
-    x:int = 0
-    y:int = 0
-    tono = img.getpixel((x,y))
+    x = 0
+    y = 0
+    tono = imgN[x,y]
     nTono = 255
 
     while anch*alto != a :
-        if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
-            imgM.putpixel((x,y), nTono)
-            #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
-            if (x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0) or \
-                (y > 0 and imgM.getpixel((x, y-1)) == 0) or \
-               (x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0) or \
-               (x < anch-1 and imgM.getpixel((x+1, y)) == 0) or \
-               (y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0) or \
-               (y < alto-1 and imgM.getpixel((x, y+1)) == 0) or \
-               (x > 0 and y < alto-1 and imgM.getpixel((x-1, y+1)) == 0) or \
-                (x > 0 and imgM.getpixel((x-1, y)) == 0):
-                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((x-1, y-1))==tono:
+        if imgN[x,y] == tono and imgM[x,y] == 0:
+            imgM[x,y] = nTono
+            if (x> 0 and y > 0 and imgM[x-1,y-1] == 0) or \
+                (y > 0 and imgM[x,y-1] == 0) or \
+               (x < anch-1 and y > 0 and imgM[x+1,y-1] == 0) or \
+               (x < anch-1 and imgM[x+1,y] == 0) or \
+               (y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0) or \
+               (y < alto-1 and imgM[x,y+1] == 0) or \
+               (x > 0 and y < alto-1 and imgM[x-1,y+1] == 0) or \
+                (x > 0 and imgM[x-1,y] == 0):
+                if x> 0 and y > 0 and imgM[x-1,y-1] == 0 and imgN[x-1,y-1]==tono:
                     y-=1
                     x-=1
-                elif y > 0 and imgM.getpixel((x, y-1)) == 0 and img.getpixel((x, y-1))==tono:
+                elif y > 0 and imgM[x,y-1] == 0 and imgN[x,y-1]==tono:
                     y-=1
-                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y-1))==tono:
+                elif x < anch-1 and y > 0 and imgM[x+1,y-1] == 0 and imgN[x+1,y-1]==tono:
                     x+=1
                     y-=1
-                elif x < anch-1 and imgM.getpixel((x+1, y)) == 0 and img.getpixel((x+1, y))==tono:
+                elif x < anch-1 and imgM[x+1,y] == 0 and imgN[x+1,y]==tono:
                     x+=1
-                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x+1, y+1))==tono:
+                elif y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0 and imgN[x+1,y+1]==tono:
                     y+=1
                     x+=1
-                elif y < alto-1 and imgM.getpixel((x, y+1)) == 0 and img.getpixel((x, y+1))==tono:
+                elif y < alto-1 and imgM[x,y+1] == 0 and imgN[x,y+1]==tono:
                     y+=1
-                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y + 1))==tono:
+                elif x > 0 and y < alto-1 and imgM[x-1,y+1] == 0 and imgN[x-1,y+1]==tono:
                     x-=1
                     y+=1
-                elif x > 0 and imgM.getpixel((x-1, y)) == 0 and img.getpixel((x-1, y))==tono:
+                elif x > 0 and imgM[x-1,y] == 0 and imgN[x-1,y]==tono:
                     x-=1
-                #print(" fX:", x, " fY:", y)
                 
        
         else:
-            #print("no se mueve")
             for i in range(anch):
                 for j in range(alto):
-                    if imgM.getpixel((i,j)) == 0:
+                    if imgM[i,j] == 0:
                         x = i
                         y = j
-                        tono = img.getpixel((i,j))
+                        tono = imgN[i,j]
                         if nTono<=50:
                             nTono = random.randint(20,255)
                         nTono = nTono // 2
@@ -247,36 +226,39 @@ def conteo_obj_8N(img: Image) -> Image:
             
 
         a+=1
+
+    
     
     return imgM
-
+@njit
 def conteo_obj_4D(img: Image) -> Image:
-    anch, alto = img.size
-    imgM = Image.new('L', (anch, alto))
+    anch, alto = img.shape
+    imgN = img
+    imgM = np.zeros((anch,alto))
     a = 0
-    x:int = 0
-    y:int = 0
-    tono = img.getpixel((x,y))
+    x = 0
+    y = 0
+    tono = imgN[x,y]
     nTono = 255
 
     while anch*alto != a :
-        if img.getpixel((x,y)) == tono and imgM.getpixel((x, y)) == 0:
-            imgM.putpixel((x,y), nTono)
+        if imgN[x,y] == tono and imgM[x,y] == 0:
+            imgM[x,y] = nTono
             #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
-            if (x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0) or \
-               (x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0) or \
-               (y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0) or \
-               (x > 0 and y < alto-1 and imgM.getpixel((x-1, y+1)) == 0):
-                if x> 0 and y > 0 and imgM.getpixel((x-1, y-1)) == 0 and img.getpixel((-x, y-1))==tono:
+            if (x> 0 and y > 0 and imgM[x-1,y-1] == 0) or \
+               (x < anch-1 and y > 0 and imgM[x+1,y-1] == 0) or \
+               (y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0) or \
+               (x > 0 and y < alto-1 and imgM[x-1,y+1] == 0):
+                if x> 0 and y > 0 and imgM[x-1,y-1] == 0 and imgN[x-1,y-1]==tono:
                     y-=1
                     x-=1
-                elif x < anch-1 and y > 0 and imgM.getpixel((x+1, y-1)) == 0 and img.getpixel((x+1, y-1))==tono:
+                elif x < anch-1 and y > 0 and imgM[x+1,y-1] == 0 and imgN[x+1,y-1]==tono:
                     x+=1
                     y-=1
-                elif y < alto-1 and x < anch-1 and imgM.getpixel((x+1, y+1)) == 0 and img.getpixel((x+1, y+1))==tono:
+                elif y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0 and imgM[x+1,y+1]==tono:
                     y+=1
                     x+=1
-                elif x > 0 and y < alto-1 and imgM.getpixel((x-1, y + 1)) == 0 and img.getpixel((x-1, y + 1))==tono:
+                elif x > 0 and y < alto-1 and imgM[x-1,y+1] == 0 and imgM[x-1,y+1]==tono:
                     x-=1
                     y+=1
                 #print(" fX:", x, " fY:", y)
@@ -286,12 +268,12 @@ def conteo_obj_4D(img: Image) -> Image:
             #print("no se mueve")
             for i in range(anch):
                 for j in range(alto):
-                    if imgM.getpixel((i,j)) == 0:
+                    if imgM[i,j] == 0:
                         x = i
                         y = j
-                        tono = img.getpixel((i,j))
+                        tono = imgN[i,j]
                         if nTono<=50:
-                            nTono = random.randint(20,255)
+                            nTono = random.randint(51,255)
                         nTono = nTono // 2
                         break 
                 else:
@@ -403,3 +385,35 @@ def filtro_negros(img: Image) -> Image:
             # Asegurarse de que el valor esté en el rango [0, 255]
             imagen_filt.putpixel((x, y), te)
     return imagen_filt
+
+def nuevoG(arr):
+    alto, ancho = arr.shape
+    img = Image.new('L', (ancho, alto))
+    for y in range(alto):
+        for x in range(ancho):
+            img.putpixel((x, y), int(arr[y, x]))
+    return img
+
+def euclidianoP(img):
+    alto, ancho =img.shape
+    xa = -ancho//2
+    xb = ancho//2
+    ya = -alto//2
+    yb = alto//2
+
+    a = ((xb-xa)**2+(ya-ya))**0.5
+    b = ((xb-xb)**2+(yb-ya)**2)**0.5
+    c = ((xa-xb)**2+(yb-yb))**0.5
+    d = ((xa-xa)**2+(ya-yb)**2)**0.5
+    suma = a+b+c+d
+    return suma
+@njit
+def umbra(img):
+    alto, ancho = img.shape
+    for y in range (alto):
+        for x in range (ancho):
+            if img[y,x]>100:
+                img[y,x] = 255
+            else:
+                img[y,x] = 0
+    return img
