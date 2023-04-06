@@ -170,6 +170,7 @@ def conteo_obj_8N(img: np.ndarray[(1024,1024), int]) -> int:
     anch, alto = img.shape
     imgN = img
     imgM = np.zeros((anch,alto))
+    tao = 0
     a = 0
     x = 0
     y = 0
@@ -213,12 +214,13 @@ def conteo_obj_8N(img: np.ndarray[(1024,1024), int]) -> int:
             for i in range(anch):
                 for j in range(alto):
                     if imgM[i,j] == 0:
+                        tao +=1
                         x = i
                         y = j
                         tono = imgN[i,j]
-                        if nTono<=50:
-                            nTono = random.randint(20,255)
                         nTono = nTono // 2
+                        if nTono<=50:
+                            nTono = random.randint(50,255)
                         break 
                 else:
                     continue  
@@ -231,8 +233,75 @@ def conteo_obj_8N(img: np.ndarray[(1024,1024), int]) -> int:
     
     return imgM
 @njit
-def conteo_obj_4D(img: Image) -> Image:
-    anch, alto = img.shape
+def prueba(img):#img es una mariz numpy que previamente era una imagen de PIL
+    alto, ancho = img.shape
+    imgM = np.zeros((alto, ancho))
+    x, y, a = 0,0,0
+    ay, ax = 0,0
+    my, mx = 0,0
+    tao = 0
+    tono = img[y,x]
+    nTono = 255
+    while alto*ancho !=a:
+        #vecinos
+        if img[y,x] == tono and imgM[y,x]==0:
+            imgM[y,x] = nTono #Para visualizar lo que pasa se punta una matriz vacia
+            if my < y:
+                my=y #se cambia el maxima altura de la forma geometrica
+            if mx < x:
+                mx=x #se cambia el maxima anchura de la forma geometrica
+            #vecino arriba
+            if y>0 and imgM[y-1,x] == 0 and img[y-1,x]==tono:
+                y-=1
+            #vecino derecha
+            elif x<ancho-1 and imgM[y,x+1] == 0 and img[y,x+1]==tono:
+                x+=1
+            #vecino abajo
+            elif y<alto-1 and imgM[y+1,x] == 0 and img[y+1,x] == tono:
+                y+=1
+            #vecino izquierda
+            elif x>0 and imgM[y,x-1]== 0 and img[y,x-1]==tono:
+                x-=1
+            else:
+                #comprovar que se relleno todo el objeto
+                for j in range(ay,my+1):
+                    for i in range(ax,mx+1):
+                        if img[j,i]==tono and imgM[j,i]== 0:
+                            y = j
+                            ay = j
+                            x = i
+                            break
+                    else:
+                        continue
+                    break
+        
+        else:
+            #se llega aqui cuando los pixeles de la figura creada ya esta
+            for ji in range(alto):
+                for ii in range(ancho):
+                    if imgM[ji,ii]==0 :
+                        x = ii
+                        y = ji
+                        ay=ji
+                        ax=ii
+                        tono = img[ji,ii]
+                        tao +=1
+                        if nTono<=50:
+                            nTono = random.randint(51,255)
+                        nTono = nTono // 2
+                        break  
+                else:
+                    continue
+                break
+
+    
+            
+            
+        a+=1
+    return imgM
+@njit
+def conteo_obj_4D(img: np.ndarray[(1024,1024), int]) -> int:
+    alto, anch = img.shape
     imgN = img
     imgM = np.zeros((anch,alto))
     a = 0
@@ -289,9 +358,7 @@ def conteo_obj_4D(img: Image) -> Image:
 
 def filtro_mediana(img: Image) -> Image:
     
-    filtro = np.array([[1,1,1],
-              [1,1,1],
-              [1,1,1]])
+    filtro = np.ones(3,3)
     
     matriz= img_central(img,filtro)
     width, height = img.size
@@ -314,7 +381,7 @@ def filtro_mediana(img: Image) -> Image:
 
 def filtro_menimo(img: Image) -> Image:
     matriz= img_central(img)
-    filtro = [1]*9
+    filtro = np.ones(3,3)
     width, height = img.size
     imagen_filt = Image.new('L', (width, height))
     te = 0
@@ -333,7 +400,6 @@ def filtro_menimo(img: Image) -> Image:
 
 
 def filtro_bancos(img: Image) -> Image:
-    filtro = [1]*9
     width, height = img.size
     imagen_filt = Image.new('L', (width, height))
     te = 0
@@ -360,7 +426,6 @@ def filtro_bancos(img: Image) -> Image:
     return imagen_filt
 
 def filtro_negros(img: Image) -> Image:
-    filtro = [1]*9
     width, height = img.size
     imagen_filt = Image.new('L', (width, height))
     te = 0
@@ -412,7 +477,7 @@ def umbra(img):
     alto, ancho = img.shape
     for y in range (alto):
         for x in range (ancho):
-            if img[y,x]>100:
+            if img[y,x]>90:
                 img[y,x] = 255
             else:
                 img[y,x] = 0

@@ -16,8 +16,8 @@ anch, alto = imagen.size
 a=1
 
 imgMN = lb.umbra(imagen_array)
-
-imagen.show()
+imgPil = Image.fromarray(imgMN)
+imgPil.show()
 while a==1:
     nombre = input("ingresa:\n1 para filtro promedio\n2 para filtro gaussian\n3 para filtro readre\n4 para filtro shapen\n5 para filtro roberts\n6 para filtro prewitt\n7 para filtro sobel\nsi queires salir, escribe salir\n")
     print("se ingrso: ", nombre)
@@ -77,10 +77,11 @@ while a==1:
         print("se añadio el filtro")
     if nombre == "8":
         t1 = time.perf_counter_ns()
-        imgM = lb.conteo_obj_4N(imgMN)
+        imgM = lb.prueba(imgMN)
     
         # Rellenar la imagen con los valores de la matriz
         imagen_pil = Image.fromarray(imgM)
+        print(imgM)
         imagen_pil.show()
         t2 = time.perf_counter_ns()
         print((t2-t1)/10**9)
@@ -88,8 +89,6 @@ while a==1:
         lb.filtro_mediana(imagen).show()
     if nombre == '10':
         t1 = time.perf_counter_ns()
-        imgMN = lb.umbra(imagen_array)
-
         imgPil = Image.fromarray(imgMN)
         imgPil.show()
         t2 = time.perf_counter_ns()
