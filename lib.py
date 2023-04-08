@@ -113,127 +113,96 @@ def filtro_solber(img):
     imagen_know = img_sum(convo(img,filtro_solberx,img_central(img,filtro_solberx)),convo(img,filtro_solbery,img_central(img,filtro_solbery)))
     return imagen_know
 
-@njit
-def conteo_obj_4N(img: np.ndarray[(1024,1024), int]) -> int:
-    anch, alto = img.shape
-    imgN = img
-    imgM = np.zeros((anch,alto))
-    a = 0
-    x = 0
-    y = 0
-    tono = imgN[x,y]
-    nTono = 255
-
-    while anch*alto != a :
-        if imgN[x,y] == tono and imgM[x,y] == 0:
-            imgM[x,y] = nTono
-            #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
-            if (y > 0 and imgM[x,y-1] == 0) or \
-               (x < anch-1 and imgM[x+1,y] == 0) or \
-               (y < alto-1 and imgM[x,y+1] == 0) or \
-               (x > 0 and imgM[x-1,y] == 0):
-                if y > 0 and imgM[x, y-1] == 0 and imgN[x,y-1]==tono:
-                    y-=1
-                elif x < anch-1 and imgM[x+1,y] == 0 and imgN[x+1,y]==tono:
-                    x+=1
-                elif y < alto-1 and imgM[x,y+1] == 0 and imgN[x,y+1]==tono:
-                    y+=1
-                elif x > 0 and imgM[x-1,y] == 0 and imgN[x-1,y]==tono:
-                    x-=1
-                #print(" fX:", x, " fY:", y)
-                
-                
-        else:
-            #print("no se mueve")
-            for i in range(anch):
-                for j in range(alto):
-                    if imgM[i,j] == 0:
-                        x = i
-                        y = j
-                        tono = imgN[i,j]
-                        if nTono<=50:
-                            nTono = random.randint(20,255)
-                        nTono = nTono // 2
-                        break 
-                else:
-                    continue  
-                break  
-
-        
-
-        a+=1
-    
-    return imgM
 
 @njit
 def conteo_obj_8N(img: np.ndarray[(1024,1024), int]) -> int:
-    anch, alto = img.shape
-    imgN = img
-    imgM = np.zeros((anch,alto))
+    alto, ancho = img.shape
+    imgM = np.zeros((alto, ancho))
+    x, y, a = 0,0,0
+    ay, ax = 0,0
+    my, mx = 0,0
     tao = 0
-    a = 0
-    x = 0
-    y = 0
-    tono = imgN[x,y]
+    tono = img[y,x]
     nTono = 255
-
-    while anch*alto != a :
-        if imgN[x,y] == tono and imgM[x,y] == 0:
-            imgM[x,y] = nTono
-            if (x> 0 and y > 0 and imgM[x-1,y-1] == 0) or \
-                (y > 0 and imgM[x,y-1] == 0) or \
-               (x < anch-1 and y > 0 and imgM[x+1,y-1] == 0) or \
-               (x < anch-1 and imgM[x+1,y] == 0) or \
-               (y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0) or \
-               (y < alto-1 and imgM[x,y+1] == 0) or \
-               (x > 0 and y < alto-1 and imgM[x-1,y+1] == 0) or \
-                (x > 0 and imgM[x-1,y] == 0):
-                if x> 0 and y > 0 and imgM[x-1,y-1] == 0 and imgN[x-1,y-1]==tono:
-                    y-=1
-                    x-=1
-                elif y > 0 and imgM[x,y-1] == 0 and imgN[x,y-1]==tono:
-                    y-=1
-                elif x < anch-1 and y > 0 and imgM[x+1,y-1] == 0 and imgN[x+1,y-1]==tono:
-                    x+=1
-                    y-=1
-                elif x < anch-1 and imgM[x+1,y] == 0 and imgN[x+1,y]==tono:
-                    x+=1
-                elif y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0 and imgN[x+1,y+1]==tono:
-                    y+=1
-                    x+=1
-                elif y < alto-1 and imgM[x,y+1] == 0 and imgN[x,y+1]==tono:
-                    y+=1
-                elif x > 0 and y < alto-1 and imgM[x-1,y+1] == 0 and imgN[x-1,y+1]==tono:
-                    x-=1
-                    y+=1
-                elif x > 0 and imgM[x-1,y] == 0 and imgN[x-1,y]==tono:
-                    x-=1
+    while alto*ancho !=a:
+        #vecinos
+        if img[y,x] == tono and imgM[y,x]==0:
+            imgM[y,x] = nTono #Para visualizar lo que pasa se punta una matriz vacia
+            if my < y:
+                my=y #se cambia el maxima altura de la forma geometrica
+            if mx < x:
+                mx=x #se cambia el maxima anchura de la forma geometrica
+            #vecino arriba
+            if y>0 and x> 0 and imgM[y-1,x-1] == 0 and img[y-1,x-1]==tono:
+                y-=1
+                x-=1
+            elif y>0 and imgM[y-1,x] == 0 and img[y-1,x]==tono:
+                y-=1
+            #vecino derecha
+            elif x<ancho-1 and y>0 and imgM[y-1,x+1] == 0 and img[y-1,x+1]==tono:
+                x+=1
+                y-=1
+            elif x<ancho-1 and imgM[y,x+1] == 0 and img[y,x+1]==tono:
+                x+=1
+            #vecino abajo
+            elif y<alto-1 and x<ancho-1 and imgM[y+1,x+1] == 0 and img[y+1,x+1] == tono:
+                y+=1
+                x+=1
+            elif y<alto-1 and imgM[y+1,x] == 0 and img[y+1,x] == tono:
+                y+=1
+            #vecino izquierda
+            elif x>0 and y < alto-1 and imgM[y+1,x-1]== 0 and img[y+1,x-1]==tono:
+                x-=1
+                y+=1
+            elif x>0 and imgM[y,x-1]== 0 and img[y,x-1]==tono:
+                x-=1
                 
-       
+            else:
+                #comprovar que se relleno todo el objeto
+                for j in range(ay,my+1):
+                    for i in range(ax,mx+1):
+                        if (imgM[ay+1,ax+1] == 0 and img[ay-1,ax-1]==tono) or \
+                            (imgM[ay+1,ax] == 0 and img[ay-1,ax]==tono) or \
+                            (imgM[ay+1,ax-1] == 0 and img[ay-1,ax+1]==tono) or \
+                            (imgM[ay,ax-1] == 0 and img[ay,ax+1]==tono) or \
+                            (imgM[ay-1,ax+1] == 0 and img[ay+1,ax+1] == tono) or\
+                            (imgM[ay-1,ax] == 0 and img[ay+1,ax] == tono) or\
+                            (imgM[ay-1,ax+1]== 0 and img[ay+1,ax-1]==tono) or\
+                            (imgM[ay,ax+1]== 0 and img[ay,ax-1]==tono):
+                            if img[j,i]==tono and imgM[j,i]== 0:
+                                y = j
+                                ay = j
+                                x = i
+                                break
+                    else:
+                        continue
+                    break
+                
         else:
-            for i in range(anch):
-                for j in range(alto):
-                    if imgM[i,j] == 0:
+            #se llega aqui cuando los pixeles de la figura creada ya esta
+            for ji in range(alto):
+                for ii in range(ancho):
+                    if imgM[ji,ii]==0 :
+                        x = ii
+                        y = ji
+                        ay=ji
+                        ax=ii
+                        tono = img[ji,ii]
                         tao +=1
-                        x = i
-                        y = j
-                        tono = imgN[i,j]
+                        if nTono<100:
+                            nTono = random.randint(100,255)
                         nTono = nTono // 2
-                        if nTono<=50:
-                            nTono = random.randint(50,255)
-                        break 
+                        break  
                 else:
-                    continue  
-                break  
+                    continue
+                break   
+
             
-
+            
         a+=1
-
-    
-    
     return imgM
 @njit
-def prueba(img):#img es una mariz numpy que previamente era una imagen de PIL
+def conteo_obj_4N(img):#img es una mariz numpy que previamente era una imagen de PIL
     alto, ancho = img.shape
     imgM = np.zeros((alto, ancho))
     x, y, a = 0,0,0
@@ -266,11 +235,15 @@ def prueba(img):#img es una mariz numpy que previamente era una imagen de PIL
                 #comprovar que se relleno todo el objeto
                 for j in range(ay,my+1):
                     for i in range(ax,mx+1):
-                        if img[j,i]==tono and imgM[j,i]== 0:
-                            y = j
-                            ay = j
-                            x = i
-                            break
+                        if (imgM[ay+1,ax] == 0 and img[ay-1,ax]==tono) or \
+                            (imgM[ay,ax-1] == 0 and img[ay,ax+1]==tono) or \
+                            (imgM[ay-1,ax] == 0 and img[ay+1,ax] == tono) or\
+                            (imgM[ay,ax+1]== 0 and img[ay,ax-1]==tono):
+                            if img[j,i]==tono and imgM[j,i]== 0:
+                                y = j
+                                ay = j
+                                x = i
+                                break
                     else:
                         continue
                     break
@@ -286,8 +259,8 @@ def prueba(img):#img es una mariz numpy que previamente era una imagen de PIL
                         ax=ii
                         tono = img[ji,ii]
                         tao +=1
-                        if nTono<=50:
-                            nTono = random.randint(51,255)
+                        if nTono<100:
+                            nTono = random.randint(100,255)
                         nTono = nTono // 2
                         break  
                 else:
@@ -301,59 +274,77 @@ def prueba(img):#img es una mariz numpy que previamente era una imagen de PIL
     return imgM
 @njit
 def conteo_obj_4D(img: np.ndarray[(1024,1024), int]) -> int:
-    alto, anch = img.shape
-    imgN = img
-    imgM = np.zeros((anch,alto))
-    a = 0
-    x = 0
-    y = 0
-    tono = imgN[x,y]
+    alto, ancho = img.shape
+    imgM = np.zeros((alto, ancho))
+    x, y, a = 0,0,0
+    ay, ax = 0,0
+    my, mx = 0,0
+    tao = 0
+    tono = img[y,x]
     nTono = 255
-
-    while anch*alto != a :
-        if imgN[x,y] == tono and imgM[x,y] == 0:
-            imgM[x,y] = nTono
-            #print("color colocado:", imgM.getpixel((x, y)), " X:", x, " Y:", y)
-            if (x> 0 and y > 0 and imgM[x-1,y-1] == 0) or \
-               (x < anch-1 and y > 0 and imgM[x+1,y-1] == 0) or \
-               (y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0) or \
-               (x > 0 and y < alto-1 and imgM[x-1,y+1] == 0):
-                if x> 0 and y > 0 and imgM[x-1,y-1] == 0 and imgN[x-1,y-1]==tono:
-                    y-=1
-                    x-=1
-                elif x < anch-1 and y > 0 and imgM[x+1,y-1] == 0 and imgN[x+1,y-1]==tono:
-                    x+=1
-                    y-=1
-                elif y < alto-1 and x < anch-1 and imgM[x+1,y+1] == 0 and imgM[x+1,y+1]==tono:
-                    y+=1
-                    x+=1
-                elif x > 0 and y < alto-1 and imgM[x-1,y+1] == 0 and imgM[x-1,y+1]==tono:
-                    x-=1
-                    y+=1
-                #print(" fX:", x, " fY:", y)
+    while alto*ancho !=a:
+        #vecinos
+        if img[y,x] == tono and imgM[y,x]==0:
+            imgM[y,x] = nTono #Para visualizar lo que pasa se punta una matriz vacia
+            if my < y:
+                my=y #se cambia el maxima altura de la forma geometrica
+            if mx < x:
+                mx=x #se cambia el maxima anchura de la forma geometrica
+            #vecino arriba
+            if y>0 and x> 0 and imgM[y-1,x-1] == 0 and img[y-1,x-1]==tono:
+                y-=1
+                x-=1
+            #vecino derecha
+            elif x<ancho-1 and y>0 and imgM[y-1,x+1] == 0 and img[y-1,x+1]==tono:
+                x+=1
+                y-=1
+            #vecino abajo
+            elif y<alto-1 and x<ancho-1 and imgM[y+1,x+1] == 0 and img[y+1,x+1] == tono:
+                y+=1
+                x+=1
+            #vecino izquierda
+            elif x>0 and y < alto-1 and imgM[y+1,x-1]== 0 and img[y+1,x-1]==tono:
+                x-=1
+                y+=1
+            else:
+                #comprovar que se relleno todo el objeto
+                for j in range(ay,my+1):
+                    for i in range(ax,mx+1):
+                        if (imgM[ay+1,ax+1] == 0 and img[ay-1,ax-1]==tono) or \
+                            (imgM[ay+1,ax-1] == 0 and img[ay-1,ax+1]==tono) or \
+                            (imgM[ay-1,ax+1] == 0 and img[ay+1,ax+1] == tono) or\
+                            (imgM[ay-1,ax+1]== 0 and img[ay+1,ax-1]==tono):
+                            if img[j,i]==tono and imgM[j,i]== 0:
+                                y = j
+                                ay = j
+                                x = i
+                                break
+                    else:
+                        continue
+                    break
                 
-       
         else:
-            #print("no se mueve")
-            for i in range(anch):
-                for j in range(alto):
-                    if imgM[i,j] == 0:
-                        x = i
-                        y = j
-                        tono = imgN[i,j]
-                        if nTono<=50:
-                            nTono = random.randint(51,255)
+            #se llega aqui cuando los pixeles de la figura creada ya esta
+            for ji in range(alto):
+                for ii in range(ancho):
+                    if imgM[ji,ii]==0 :
+                        x = ii
+                        y = ji
+                        ay=ji
+                        ax=ii
+                        tono = img[ji,ii]
+                        tao +=1
+                        if nTono<100:
+                            nTono = random.randint(100,255)
                         nTono = nTono // 2
-                        break 
+                        break  
                 else:
-                    continue  
-                break  
-           
+                    continue
+                break   
 
             
-
+            
         a+=1
-    
     return imgM
 
 def filtro_mediana(img: Image) -> Image:

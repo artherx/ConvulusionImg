@@ -77,7 +77,7 @@ while a==1:
         print("se añadio el filtro")
     if nombre == "8":
         t1 = time.perf_counter_ns()
-        imgM = lb.prueba(imgMN)
+        imgM = lb.conteo_obj_8N(imgMN)
     
         # Rellenar la imagen con los valores de la matriz
         imagen_pil = Image.fromarray(imgM)
