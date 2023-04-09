@@ -10,7 +10,7 @@ imagen = Image.open('assets\img\chess.jpg')
 # Convertir a escala de grises
 width, height = imagen.size
 imagen = imagen.convert('L')
-
+imagenAr = np.array(imagen)
 imagen_array = np.array(imagen)
 anch, alto = imagen.size
 a=1
@@ -19,20 +19,20 @@ imgMN = lb.umbra(imagen_array)
 imgPil = Image.fromarray(imgMN)
 imgPil.show()
 while a==1:
-    nombre = input("ingresa:\n1 para filtro promedio\n2 para filtro gaussian\n3 para filtro readre\n4 para filtro shapen\n5 para filtro roberts\n6 para filtro prewitt\n7 para filtro sobel\nsi queires salir, escribe salir\n")
+    nombre = input("ingresa:\n1 para filtro promedio\n2 para filtro gaussian\n3 para filtro readre\n4 para filtro shapen\n5 para filtro roberts\n6 para filtro prewitt\n7 para filtro sobel\n8 contar objetos 4N\n9 contar objetos 8N\n 10 contar objetos 4D\nsi queires salir, escribe salir\n")
     print("se ingrso: ", nombre)
     if nombre=="1":
         tam = input("ingresa 3, 5, 9 para hacer una mascara de esos tamaños 3x3, 5x5 o 9x9: ")
         if tam.isdigit():
             tam = int(tam)
             if tam == 3:
-                filtro_promedio=lb.convo(imagen,lb.filt_prome(tam),lb.img_central(imagen,lb.filt_prome(tam))).show()
+                filtro_promedio=lb.convo(imagenAr,lb.filt_prome(tam),lb.img_central(imagenAr,lb.filt_prome(tam))).show()
                 print("se añadio el filtro")
             if tam == 5:
-                filtro_promedio=lb.convo(imagen,lb.filt_prome(tam),lb.img_central(imagen,lb.filt_prome(tam))).show()
+                filtro_promedio=lb.convo(imagenAr,lb.filt_prome(tam),lb.img_central(imagenAr,lb.filt_prome(tam))).show()
                 print("se añadio el filtro")
             if tam == 9:
-                filtro_promedio=lb.convo(imagen,lb.filt_prome(tam),lb.img_central(imagen,lb.filt_prome(tam))).show()
+                filtro_promedio=lb.convo(imagenAr,lb.filt_prome(tam),lb.img_central(imagenAr,lb.filt_prome(tam))).show()
                 print("se añadio el filtro")
             else:
                 print("Regresaras al inicio, ya que ingesaste valores no existentes: ")
@@ -46,13 +46,13 @@ while a==1:
             if tam.isdigit():
                 tam = int(tam)
                 if tam == 3:
-                    filtro_gaussiano=lb.convo(imagen,lb.filt_gaussian(tam,sigma),lb.img_central(imagen,lb.filt_prome(tam))).show()
+                    filtro_gaussiano=lb.convo(imagenAr,lb.filt_gaussian(tam,sigma),lb.img_central(imagenAr,lb.filt_prome(tam))).show()
                     print("se añadio el filtro")
                 if tam == 5:
-                    filtro_gaussiano=lb.convo(imagen,lb.filt_prome(tam),lb.img_central(imagen,lb.filt_prome(tam))).show()
+                    filtro_gaussiano=lb.convo(imagenAr,lb.filt_prome(tam),lb.img_central(imagenAr,lb.filt_prome(tam))).show()
                     print("se añadio el filtro")
                 if tam == 9:
-                    filtro_gaussiano=lb.convo(imagen,lb.filt_prome(tam),lb.img_central(imagen,lb.filt_prome(tam))).show()
+                    filtro_gaussiano=lb.convo(imagenAr,lb.filt_prome(tam),lb.img_central(imagenAr,lb.filt_prome(tam))).show()
                     print("se añadio el filtro")
                 else:
                     print("Regresaras al inicio, ya que ingesaste valores no existentes: ")
@@ -61,36 +61,39 @@ while a==1:
         else:
             print("Regresaras al inicio, ya que no ingesaste números")
     if nombre == "3":
-        filtro_redre = lb.convo(imagen,lb.filtro_redre,lb.img_central(imagen,lb.filtro_redre)).show()
+        filtro_redre = lb.convo(imagenAr,lb.filtro_redre,lb.img_central(imagenAr,lb.filtro_redre)).show()
         print("se añadio el filtro")
     if nombre == "4":
-        filtro_shapen = lb.convo(imagen,lb.filtro_shapen,lb.img_central(imagen,lb.filtro_shapen)).show()
+        filtro_shapen = lb.convo(imagenAr,lb.filtro_shapen,lb.img_central(imagenAr,lb.filtro_shapen)).show()
         print("se añadio el filtro")
     if nombre == "5":
-        filtro_ruberts = lb.convo(imagen,lb.filtro_roberts,lb.img_central(imagen,lb.filtro_roberts)).show()
+        filtro_ruberts = lb.convo(imagenAr,lb.filtro_roberts,lb.img_central(imagenAr,lb.filtro_roberts)).show()
         print("se añadio el filtro")
     if nombre == "6":
-        filtro_solber = lb.filtro_solber(imagen).show()
+        filtro_solber = lb.filtro_solber(imagenAr).show()
         print("se añadio el filtro")
     if nombre == "7":
-        filtro_ruberts = lb.prewitt(imagen).show()
+        filtro_ruberts = lb.prewitt(imagenAr).show()
         print("se añadio el filtro")
     if nombre == "8":
         t1 = time.perf_counter_ns()
-        imgM = lb.conteo_obj_8N(imgMN)
-    
+        imgM = lb.conteo_obj_4N(imgMN)
         # Rellenar la imagen con los valores de la matriz
-        imagen_pil = Image.fromarray(imgM)
         print(imgM)
-        imagen_pil.show()
         t2 = time.perf_counter_ns()
         print((t2-t1)/10**9)
     if nombre == "9":
-        lb.filtro_mediana(imagen).show()
+        t1 = time.perf_counter_ns()
+        imgM = lb.conteo_obj_8N(imgMN)
+        # Rellenar la imagen con los valores de la matriz
+        print(imgM)
+        t2 = time.perf_counter_ns()
+        print((t2-t1)/10**9)
     if nombre == '10':
         t1 = time.perf_counter_ns()
-        imgPil = Image.fromarray(imgMN)
-        imgPil.show()
+        imgM = lb.conteo_obj_4D(imgMN)
+        # Rellenar la imagen con los valores de la matriz
+        print(imgM)
         t2 = time.perf_counter_ns()
         print((t2-t1)/10**9)
     if nombre == "salir":

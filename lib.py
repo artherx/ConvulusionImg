@@ -27,15 +27,16 @@ def filt_gaussian(tam, sigma:float):
             gaussian_filter[y+m_half, x+n_half] = normal * exp_term
     return gaussian_filter
 
-def img_central(imagen: Image, filtro):
-    width, height = imagen.size
-    borde = filtro.shape[0] // 2
-    matriz = np.zeros((width + 2 * borde, height + 2 * borde))
+def img_central(imagen, filtro):
+    height, width= imagen.shape
+    fHeight, fWidth= filtro.shape
+    borde = fHeight // 2
+    matriz = np.zeros((height + 2 * borde, width + 2 * borde))
 
     # Rellenar la matriz con los valores de la imagen
-    for x in range(width):
-        for y in range(height):
-            matriz[x + borde, y + borde] = imagen.getpixel((x, y))
+    for y in range(height):
+        for x in range(width):
+            matriz[y + borde, x + borde] = imagen[y,x]
     return matriz
 
 
@@ -70,39 +71,40 @@ prewittx = np.array([[1,1,1],
 prewitty = np.array([[-1,0,1],
                     [-1,0,1],
                     [-1,0,1]])
-
+@njit
 def convo(imagen,filtro,matriz):
-    width, height = imagen.size
-    imagen_filt = Image.new('L', (width, height))
-    for x in range(width):
-        for y in range(height):
+    height , width = imagen.shape
+    fHeight , fWidth = filtro.shape
+    imagen_filt = np.zeros((height,width))
+    for y in range(height):
+        for x in range(width):
             suma = 0
-            for i in range(filtro.shape[0]):
-                for j in range(filtro.shape[1]):
-                    suma = suma + (matriz[x + i, y + j] * filtro[i, j])
-                    suma += (matriz[x + i, y + j] * filtro[i, j])
+            for j in range(fHeight):
+                for i in range(fWidth):
+                    suma += (matriz[y + j, x + i] * filtro[j, i])
             # Asegurarse de que el valor esté en el rango [0, 255]
             valor = int(max(0, min(suma, 255)))
-            imagen_filt.putpixel((x, y), valor)
+            imagen_filt[y,x] = valor
     return imagen_filt
 
 
 
-
+@njit
 def img_resta(imagen,imagen_filt):
-    width, height = imagen.size
-    imagen_know = Image.new('L', (width, height))
-    for x in range(width):
-        for y in range(height):
-            imagen_know.putpixel((x,y),(imagen.getpixel((x,y))-imagen_filt.getpixel((x,y))))
+    height , width  = imagen.shape
+    imagen_know = np.zeros((height,width))
+    for y in range(height):
+        for x in range(width):
+            imagen_know[y,x] = imagen[y,x]-imagen_filt[y,x]
     return imagen_know
 
+@njit
 def img_sum(imagen,imagen_filt):
-    width, height = imagen.size
-    imagen_know = Image.new('L', (width, height))
-    for x in range(width):
-        for y in range(height):
-            imagen_know.putpixel((x,y),(imagen.getpixel((x,y))+imagen_filt.getpixel((x,y))))
+    height, width= imagen.shape
+    imagen_know =np.zeros((height,width))
+    for y in range(height):
+        for x in range(width):
+            imagen_know[y,x]= imagen[y,x]+imagen_filt[y,x]
     return imagen_know
 
 def prewitt(img):
@@ -200,7 +202,7 @@ def conteo_obj_8N(img: np.ndarray[(1024,1024), int]) -> int:
             
             
         a+=1
-    return imgM
+    return tao
 @njit
 def conteo_obj_4N(img):#img es una mariz numpy que previamente era una imagen de PIL
     alto, ancho = img.shape
@@ -271,7 +273,7 @@ def conteo_obj_4N(img):#img es una mariz numpy que previamente era una imagen de
             
             
         a+=1
-    return imgM
+    return tao
 @njit
 def conteo_obj_4D(img: np.ndarray[(1024,1024), int]) -> int:
     alto, ancho = img.shape
@@ -345,101 +347,101 @@ def conteo_obj_4D(img: np.ndarray[(1024,1024), int]) -> int:
             
             
         a+=1
-    return imgM
+    return tao
 
-def filtro_mediana(img: Image) -> Image:
+def filtro_mediana(img):
     
     filtro = np.ones(3,3)
     
     matriz= img_central(img,filtro)
-    width, height = img.size
-    imagen_filt = Image.new('L', (width, height))
+    height , width  = img.shape
+    imagen_filt = np.zeros((height,width))
     te = 0
-    c = 1
-    for x in range(width):
-        for y in range(height):
-            for i in range(filtro.shape[0]):
-                for j in range(filtro.shape[1]):
-                    if j+1 < width-1 and matriz[x, j] > matriz[x, j+1]:
+    for y in range(height):
+        for x in range(width):
+            for j in range(filtro.shape[1]):
+                for i in range(filtro.shape[0]):
+                    if i+1 < width-1 and matriz[i, x] > matriz[i+1, x]:
                         te = img
-                        matriz[i,j] = matriz[i,j+1]
-                        matriz[i, j+1] = te
+                        matriz[i, x] = matriz[i+1, x]
+                        matriz[i+1, x] = te
                         
             te = matriz[1,1]
             # Asegurarse de que el valor esté en el rango [0, 255]
-            imagen_filt.putpixel((x, y), te)
+            imagen_filt[y,x] = te
     return imagen_filt
 
-def filtro_menimo(img: Image) -> Image:
+def filtro_menimo(img):
     matriz= img_central(img)
     filtro = np.ones(3,3)
     width, height = img.size
-    imagen_filt = Image.new('L', (width, height))
+    imagen_filt = np.zeros((height,width))
     te = 0
-    c = 1
-    for x in range(width):
-        for y in range(height):
-            for i in range(filtro.shape[0]):
-                for j in range(filtro.shape[1]):
-                    if j+1 < width-1 and matriz[x, j] > matriz[x, j+1]:
-                        te = matriz[x, j+1]
+    for y in range(width):
+        for x in range(height):
+            for j in range(filtro.shape[0]):
+                for i in range(filtro.shape[1]):
+                    if i+1 < width-1 and matriz[i, x] > matriz[i+1, x]:
+                        te = matriz[i+1, x]
                         
             # Asegurarse de que el valor esté en el rango [0, 255]
-            imagen_filt.putpixel((x, y), te)
+            imagen_filt[y,x] = te
     return imagen_filt
 
 
 
-def filtro_bancos(img: Image) -> Image:
-    width, height = img.size
-    imagen_filt = Image.new('L', (width, height))
+def filtro_blancos(img):
+    height, width = img.shape
+    imagen_filt = np.zeros((height,width))
     te = 0
-    c = 1
-    for x in range(width):
-        for y in range(height):
-            if img.getpixel((x,y))==255:
-                if y > 0 and img.getpixel((x, y-1)) != 255 :
-                    te1 = 0
-                    te1 = img.getpixel((x,y-1))
-                if x < width-1 and img.getpixel((x+1, y)) != 255:
-                    te2 = 0
-                    te2 = img.getpixel((x+1,y))
-                if y < height-1 and img.getpixel((x, y+1)) != 255:
-                    te3 = 0
-                    te3 = img.getpixel((x,y+1))
-                if x > 0 and img.getpixel((x-1, y)) != 255:
-                    te4 = 0
-                    te4 = img.getpixel((x-1,y))
+    te1 = 0
+    te2 = 0
+    te3 = 0
+    te4 = 0
+    for y in range(height):
+        for x in range(width):
+            if img[y,x]==255:
+                if y > 0 and img[y-1,x] != 255 :
+                    te1 = img[y-1,x]
+                if x < width-1 and img[y,x+1] != 255:
+                    te2 = img[y,x+1]
+                if y < height-1 and img[y+1,x] != 255:
+                    te3 = img[y+1,x]
+                if x > 0 and img[y,x-1] != 255:
+                    te4 = img[y,x-1]
                 te = (te1+te2+te3+te4)//4
+            else:
+                te = img[y,x]
 
+            
             # Asegurarse de que el valor esté en el rango [0, 255]
-            imagen_filt.putpixel((x, y), te)
+            imagen_filt[y,x] = te
     return imagen_filt
 
-def filtro_negros(img: Image) -> Image:
-    width, height = img.size
-    imagen_filt = Image.new('L', (width, height))
+
+def filtro_negros(img):
+    height, width = img.shape
+    imagen_filt = np.zeros((height,width))
     te = 0
-    c = 1
-    for x in range(width):
-        for y in range(height):
-            if img.getpixel((x,y))==0:
-                if y > 0 and img.getpixel((x, y-1)) != 0 :
+    for y in range(height):
+        for x in range(width):
+            if img[x,y]==0:
+                if y > 0 and img[y-1,x] != 0 :
                     te1 = 0
-                    te1 = img.getpixel((x,y-1))
-                if x < width-1 and img.getpixel((x+1, y)) != 0:
+                    te1 = img[y-1,x]
+                if x < width-1 and img[y,x+1] != 0:
                     te2 = 0
-                    te2 = img.getpixel((x+1,y))
-                if y < height-1 and img.getpixel((x, y+1)) != 0:
+                    te2 = img[y,x+1]
+                if y < height-1 and img[y+1,x] != 0:
                     te3 = 0
-                    te3 = img.getpixel((x,y+1))
-                if x > 0 and img.getpixel((x-1, y)) != 0:
+                    te3 = img[y+1,x]
+                if x > 0 and img[y,x-1] != 0:
                     te4 = 0
-                    te4 = img.getpixel((x-1,y))
+                    te4 = img[y,x-1]
                 te = (te1+te2+te3+te4)//4
 
             # Asegurarse de que el valor esté en el rango [0, 255]
-            imagen_filt.putpixel((x, y), te)
+            imagen_filt[y,x] = te
     return imagen_filt
 
 def nuevoG(arr):
