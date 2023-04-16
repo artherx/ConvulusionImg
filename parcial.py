@@ -2,6 +2,9 @@
 from PIL import Image
 from scipy.fft import dctn, idctn
 import numpy as np
+import os
+
+CPU=os.cpu_count()
 
 # Paso 1: Subdividir la imagen en matrices de 8x8
 def subdividir_imagen(imagen):
@@ -26,11 +29,11 @@ def suma_128(subdivisiones):
 # Paso 3: Aplicar la transformada discreta de coseno (DCT) en cada subdivisión
 def aplicar_dct(subdivisiones):
     for i in range(len(subdivisiones)):
-        subdivisiones[i] = dctn(subdivisiones[i], norm='ortho')
+        subdivisiones[i] = dctn(subdivisiones[i])
     return subdivisiones
 def aplicar_idctn(subdivisiones):
     for i in range(len(subdivisiones)):
-        subdivisiones[i] = idctn(subdivisiones[i], norm='ortho')
+        subdivisiones[i] = idctn(subdivisiones[i])
     return subdivisiones
 
 # Paso 4: Dividir la subdivisión con la matriz de cuantización estándar
@@ -40,7 +43,7 @@ def dividir_con_matriz_quantizacion(subdivisiones, matriz_quantizacion):
     return subdivisiones
 def multiplicar_con_matriz_quantizacion(subdivisiones, matriz_quantizacion):
     for i in range(len(subdivisiones)):
-        subdivisiones[i] = np.round(subdivisiones[i] * matriz_quantizacion)
+        subdivisiones[i] = subdivisiones[i] * matriz_quantizacion
     return subdivisiones
 
 # Paso 5: Combinar las subdivisiones en una matriz del mismo tamaño que la imagen original
@@ -79,15 +82,24 @@ matriz_quantizacion = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
                                [72, 92, 95, 98, 112, 100, 103, 99]])
 
 subdivisiones = dividir_con_matriz_quantizacion(subdivisiones, matriz_quantizacion)
+baja =combinar_subdivisiones(subdivisiones, imagen)
+tasaCompre = imagen.nbytes / baja.nbytes
 
 #vuelta al mundo
 subdivisiones = multiplicar_con_matriz_quantizacion(subdivisiones, matriz_quantizacion)
 subdivisiones = aplicar_idctn(subdivisiones)
 subdivisiones = suma_128(subdivisiones)
 
+
 # Paso 5: Combinar las subdivisiones en una matriz del mismo tamaño que la imagen original
 subdivisiones =combinar_subdivisiones(subdivisiones, imagen)
+#calculo de error cuadratico medio
 
+tasaCompre = imagen.nbytes / subdivisiones.nbytes
+diferencia = (imagen.astype("float") - subdivisiones.astype("float"))**2
+mse = np.mean(diferencia)
+print('Error cuadratico',mse)
+print('Tasa de comresion', tasaCompre)
 imgSub = Image.fromarray(subdivisiones)
 imgSub.show()
 
