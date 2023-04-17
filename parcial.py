@@ -5,6 +5,14 @@ import numpy as np
 import os
 
 CPU=os.cpu_count()
+matriz_quantizacion = np.array([[89,  72,  58,  72,  95, 114, 131, 137],
+                               [72,  62,  51,  60,  81, 104, 126, 130],
+                               [58,  51,  46,  56,  76,  98, 119, 124],
+                               [72,  60,  56,  68,  87, 103, 121, 128],
+                               [95,  81,  76,  87, 105, 125, 138, 145],
+                               [114, 104,  98, 103, 125, 145, 161, 169],
+                               [131, 126, 119, 121, 138, 161, 180, 192],
+                               [137, 130, 124, 128, 145, 169, 192, 210]])
 
 # Paso 1: Subdividir la imagen en matrices de 8x8
 def subdividir_imagen(imagen):
@@ -33,7 +41,7 @@ def aplicar_dct(subdivisiones):
     return subdivisiones
 def aplicar_idctn(subdivisiones):
     for i in range(len(subdivisiones)):
-        subdivisiones[i] = idctn(subdivisiones[i])
+        subdivisiones[i] = np.round(idctn(subdivisiones[i]))
     return subdivisiones
 
 # Paso 4: Dividir la subdivisión con la matriz de cuantización estándar
@@ -43,7 +51,7 @@ def dividir_con_matriz_quantizacion(subdivisiones, matriz_quantizacion):
     return subdivisiones
 def multiplicar_con_matriz_quantizacion(subdivisiones, matriz_quantizacion):
     for i in range(len(subdivisiones)):
-        subdivisiones[i] = subdivisiones[i] * matriz_quantizacion
+        subdivisiones[i] = np.round(subdivisiones[i] * matriz_quantizacion)
     return subdivisiones
 
 # Paso 5: Combinar las subdivisiones en una matriz del mismo tamaño que la imagen original
@@ -58,49 +66,47 @@ def combinar_subdivisiones(subdivisiones, forma_original):
     return imagen_comprimida
 
 # Cargar la imagen
-imagen = Image.open('assets\img\WhatsApp Image 2023-03-20 at 9.05.16 PM.jpeg').convert('L')  # Ejemplo de imagen generada aleatoriamente, reemplazar con la imagen deseada
+imagen = Image.open('assets\img\Selfie.jpg')# Ejemplo de imagen generada aleatoriamente, reemplazar con la imagen deseada
+
 imagen.show()
 imagen = np.array(imagen)
+original_MB = os.path.getsize("assets\img\WhatsApp Image 2023-03-20 at 9.05.16 PM.jpeg") / 1024**2
 
 # Paso 1: Subdividir la imagen en matrices de 8x8
 subdivisiones = subdividir_imagen(imagen)
 
 # Paso 2: Restar cada pixel por 128
-subdivisiones = restar_128(subdivisiones)
-
 # Paso 3: Aplicar la transformada discreta de coseno (DCT) en cada subdivisión
 subdivisiones = aplicar_dct(subdivisiones)
 
 # Paso 4: Dividir la subdivisión con la matriz de cuantización estándar
-matriz_quantizacion = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
-                               [12, 12, 14, 19, 26, 58, 60, 55],
-                               [14, 13, 16, 24, 40, 57, 69, 56],
-                               [14, 17, 22, 29, 51, 87, 80, 62],
-                               [18, 22, 37, 56, 68, 109, 103, 77],
-                               [24, 35, 55, 64, 81, 104, 113, 92],
-                               [49, 64, 78, 87, 103, 121, 120, 101],
-                               [72, 92, 95, 98, 112, 100, 103, 99]])
 
 subdivisiones = dividir_con_matriz_quantizacion(subdivisiones, matriz_quantizacion)
 baja =combinar_subdivisiones(subdivisiones, imagen)
-tasaCompre = imagen.nbytes / baja.nbytes
+imgSub = Image.fromarray(baja).convert('L')
+imgSub.save('assets\img\WCompre.jpeg')
+compre_MB = os.path.getsize("assets\img\WCompre.jpeg") / 1024**2
+imgSub.show()
 
 #vuelta al mundo
 subdivisiones = multiplicar_con_matriz_quantizacion(subdivisiones, matriz_quantizacion)
 subdivisiones = aplicar_idctn(subdivisiones)
-subdivisiones = suma_128(subdivisiones)
 
 
 # Paso 5: Combinar las subdivisiones en una matriz del mismo tamaño que la imagen original
 subdivisiones =combinar_subdivisiones(subdivisiones, imagen)
 #calculo de error cuadratico medio
 
-tasaCompre = imagen.nbytes / subdivisiones.nbytes
-diferencia = (imagen.astype("float") - subdivisiones.astype("float"))**2
+#tasaCompre = imagen.nbytes / subdivisiones.nbytes
+tasaCompre = imagen.nbytes / baja.nbytes
+diferencia = (imagen - baja)**2
 mse = np.mean(diferencia)
 print('Error cuadratico',mse)
-print('Tasa de comresion', tasaCompre)
-imgSub = Image.fromarray(subdivisiones)
+print('Tasa de compresion original vs descomprimida ', original_MB)
+tasaCompre = (imagen.nbytes/(1024**2)) / (subdivisiones.nbytes/(1024**2))
+print('Tasa de compresion original vs comprimida ', compre_MB, " ", (baja.nbytes/(1024**2)))
+imgSub = Image.fromarray(subdivisiones).convert('L')
+imgSub.save('assets\img\WDesco.jpeg')
 imgSub.show()
 
 # Las subdivisiones comprimidas están ahora en forma de matriz y se pueden procesar o guardar según sea necesario
