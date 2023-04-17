@@ -97,14 +97,11 @@ subdivisiones = aplicar_idctn(subdivisiones)
 subdivisiones =combinar_subdivisiones(subdivisiones, imagen)
 #calculo de error cuadratico medio
 
-#tasaCompre = imagen.nbytes / subdivisiones.nbytes
-tasaCompre = imagen.nbytes / baja.nbytes
-diferencia = (imagen - baja)**2
+tasaCompre = imagen.nbytes / subdivisiones.nbytes
+diferencia = (imagen - subdivisiones)**2
 mse = np.mean(diferencia)
 print('Error cuadratico',mse)
-print('Tasa de compresion original vs descomprimida ', original_MB)
-tasaCompre = (imagen.nbytes/(1024**2)) / (subdivisiones.nbytes/(1024**2))
-print('Tasa de compresion original vs comprimida ', compre_MB, " ", (baja.nbytes/(1024**2)))
+print('Tasa de compresion original vs descomprimida ',tasaCompre)
 imgSub = Image.fromarray(subdivisiones).convert('L')
 imgSub.save('assets\img\WDesco.jpeg')
 imgSub.show()
