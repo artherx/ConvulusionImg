@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import multiprocessing
 from PIL import Image
 from numba import njit
 import random

@@ -66,11 +66,10 @@ def combinar_subdivisiones(subdivisiones, forma_original):
     return imagen_comprimida
 
 # Cargar la imagen
-imagen = Image.open('assets\img\Selfie.jpg')# Ejemplo de imagen generada aleatoriamente, reemplazar con la imagen deseada
+imagen = Image.open('Selfie.jpg')# Ejemplo de imagen generada aleatoriamente, reemplazar con la imagen deseada
 
 imagen.show()
 imagen = np.array(imagen)
-original_MB = os.path.getsize("assets\img\WhatsApp Image 2023-03-20 at 9.05.16 PM.jpeg") / 1024**2
 
 # Paso 1: Subdividir la imagen en matrices de 8x8
 subdivisiones = subdividir_imagen(imagen)
@@ -84,8 +83,7 @@ subdivisiones = aplicar_dct(subdivisiones)
 subdivisiones = dividir_con_matriz_quantizacion(subdivisiones, matriz_quantizacion)
 baja =combinar_subdivisiones(subdivisiones, imagen)
 imgSub = Image.fromarray(baja).convert('L')
-imgSub.save('assets\img\WCompre.jpeg')
-compre_MB = os.path.getsize("assets\img\WCompre.jpeg") / 1024**2
+imgSub.save('WCompre.jpeg')
 imgSub.show()
 
 #vuelta al mundo
@@ -103,7 +101,7 @@ mse = np.mean(diferencia)
 print('Error cuadratico',mse)
 print('Tasa de compresion original vs descomprimida ',tasaCompre)
 imgSub = Image.fromarray(subdivisiones).convert('L')
-imgSub.save('assets\img\WDesco.jpeg')
+imgSub.save('WDesco.jpeg')
 imgSub.show()
 
 # Las subdivisiones comprimidas están ahora en forma de matriz y se pueden procesar o guardar según sea necesario

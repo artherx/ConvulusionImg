@@ -1,10 +1,8 @@
 import lib as lb
 from PIL import Image
 import numpy as np
-import time
-import os
 
-imagen = Image.open('assets\img\WhatsApp Image 2023-03-20 at 9.05.16 PM.jpeg')
+imagen = Image.open('WhatsApp Image 2023-03-20 at 9.05.16 PM.jpeg')
 
 imagen = imagen.convert('L')
 imagen_array = np.array(imagen)
