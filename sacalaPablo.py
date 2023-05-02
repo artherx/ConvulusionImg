@@ -18,7 +18,7 @@ print(coords.shape)
 black = np.zeros_like(img_np)
 print(black.shape)
 # Copiar los píxeles amarillos a la matriz en negro
-black[coords[:,0], coords[:,1], :] = img_np[coords[:,0], coords[:,1], :] = img_np[coords[:,0], coords[:,1], :] = img_np[coords[:,0], coords[:,1], :]
+black[coords[:,0], coords[:,1], :] = img_np[coords[:,0], coords[:,1], :]
 
 # Crear una nueva imagen con la matriz en negro
 new_img = Image.fromarray(black)
