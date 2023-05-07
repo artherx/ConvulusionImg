@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from PIL import Image
 
 
@@ -68,7 +69,111 @@ def gradienteMorfo(url,filtro):
 url ="LogosUMNGabiertos.png"
 prueba = Image.open(url).convert("L")
 prueba.show()
-prueba = np.array(prueba)
-preuba= gradienteMorfo(prueba,estrucCirculo)
-preuba= Image.fromarray(preuba)
-preuba.show()
+preuba = np.array(prueba)
+while(True):
+    tipo = input("Ingrese 1 para dilatación\n2 para erosión\n3 para cierre\n4 para apartura\n5 para gradiente morfologico\n")
+    tipo =int(tipo)
+    print("Se ingreso", tipo)
+    if tipo == 1:
+        tip = input("Ingrese 1 para estruc3x3\n 2 para estrucCruz\n 3 para estruc5x5\n 4 para estrucCirculo\n")
+        print("Se ingreso", tipo)
+        tipo =int(tipo)
+        if tipo == 1:
+            apunta = dilatacion(preuba,estruc3x3)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 2:
+            apunta = dilatacion(preuba,estrucCruz)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 3:
+            apunta = dilatacion(preuba,estruc5x5)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 4:
+            apunta = dilatacion(preuba,estrucCirculo)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+    if tipo == 2:
+        tipo = input("Ingrese 1 para estruc3x3\n 2 para estrucCruz\n 3 para estruc5x5\n 4 para estrucCirculo\n")
+        print("Se ingreso", tipo)
+        tipo =int(tipo)
+        if tipo == 1:
+            apunta = erosion(preuba,estruc3x3)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 2:
+            apunta = erosion(preuba,estrucCruz)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 3:
+            apunta = erosion(preuba,estruc5x5)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 4:
+            apunta = erosion(preuba,estrucCirculo)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+    if tipo == 3:
+        tipo = input("Ingrese 1 para estruc3x3\n 2 para estrucCruz\n 3 para estruc5x5\n 4 para estrucCirculo\n")
+        print("Se ingreso", tipo)
+        tipo =int(tipo)
+        if tipo == 1:
+            apunta = cierre(preuba,estruc3x3)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 2:
+            apunta = cierre(preuba,estrucCruz)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 3:
+            apunta = cierre(preuba,estruc5x5)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 4:
+            apunta = cierre(preuba,estrucCirculo)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+    if tipo == 4:
+        tipo = input("Ingrese 1 para estruc3x3\n 2 para estrucCruz\n 3 para estruc5x5\n 4 para estrucCirculo\n")
+        print("Se ingreso", tipo)
+        tipo =int(tipo)
+        if tipo == 1:
+            apunta = apertura(preuba,estruc3x3)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 2:
+            apunta = apertura(preuba,estrucCruz)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 3:
+            apunta = apertura(preuba,estruc5x5)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 4:
+            apunta = apertura(preuba,estrucCirculo)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+    if tipo == 5:
+        tipo = input("Ingrese 1 para estruc3x3\n 2 para estrucCruz\n 3 para estruc5x5\n 4 para estrucCirculo\n")
+        print("Se ingreso", tipo)
+        tipo =int(tipo)
+        if tipo == 1:
+            apunta = gradienteMorfo(preuba,estruc3x3)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 2:
+            apunta = gradienteMorfo(preuba,estrucCruz)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 3:
+            apunta = gradienteMorfo(preuba,estruc5x5)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+        if tipo == 4:
+            apunta = gradienteMorfo(preuba,estrucCirculo)
+            apunta= Image.fromarray(apunta)
+            apunta.show()
+    os.system("cls")
+
+
