@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Crear el objeto VideoCapture para acceder a la cámara
-cap = cv2.VideoCapture(1)  # 0 indica el índice de la cámara predeterminada
+cap = cv2.VideoCapture(701)  # 0 indica el índice de la cámara predeterminada
 
 # Verificar si la cámara se abrió correctamente
 if not cap.isOpened():
@@ -17,7 +17,6 @@ while True:
     if not ret:
         print("No se pudo recibir el cuadro de la cámara")
         break
-    height, width, _ = frame.shape
 
 
 
@@ -25,9 +24,8 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
     gray = cv2.erode(gray,kernel,iterations=2)
-    gray = cv2.dilate(gray,kernel,iterations=4)
+    gray = cv2.dilate(gray,kernel,iterations=5)
 
-    gray= cv2.GaussianBlur(gray,(5,5),0)
     # Aplicar el algoritmo de detección de bordes (Canny)
     edges = cv2.Canny(gray, 100, 200)
     
@@ -42,8 +40,6 @@ while True:
         if a==0: a=1
         cx=int(momento['m10']/a)
         cy=int(momento['m01']/a)
-        cv2.circle(draw,(cx,cy),3,(0,0,255),-1)
-        cv2.putText(draw,"R/. "+str(moneda),(cx+10,cy+10),font,0.5,(0,0,0),2)
         # Extraer la región de interés del contorno
         x, y, w, h = cv2.boundingRect(i)
         roi = frame[y:y+h, x:x+w]
@@ -52,7 +48,7 @@ while True:
         hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
         # Definir los rangos de color para la resistencia (verde)
-        lower_color = np.array([32, 50, 50])
+        lower_color = np.array([30,52,30])
         upper_color = np.array([85, 255, 255])
 
         # # Rango de color para el marrón
@@ -73,6 +69,9 @@ while True:
         # Dibujar los contornos encontrados en el cuadro original
         cv2.drawContours(roi, contours_mask, -1, (0, 255, 0), 2)
         cv2.imshow("Roi", roi)
+        
+        cv2.circle(draw,(cx,cy),3,(0,0,255),-1)
+        cv2.putText(draw,"R/. "+str(moneda),(cx+10,cy+10),font,0.5,(0,0,0),2)
 
         if len(contours_mask) > 0:
             print("¡Color encontrado!")
